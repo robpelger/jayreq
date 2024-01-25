@@ -1,4 +1,4 @@
-plugins {    
+plugins {
     java
 }
 
@@ -15,6 +15,10 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
     testImplementation("org.hamcrest:hamcrest-library:2.2")
+    testImplementation("org.testcontainers:testcontainers:1.19.3")
+    testImplementation("org.testcontainers:junit-jupiter:1.19.3")
+    testImplementation("org.slf4j:slf4j-simple:2.0.11")
+
 }
 
 java {
