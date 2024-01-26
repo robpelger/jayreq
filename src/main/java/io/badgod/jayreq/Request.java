@@ -16,7 +16,14 @@ public class Request {
     private Request(URI uri, HttpMethod method, String... headers) {
         this.method = method;
         this.uri = uri;
-        this.headers = headers;
+        this.headers = validateHeaders(headers);
+    }
+
+    private static String[] validateHeaders(String... headers){
+        if(headers == null || headers.length % 2 == 0) {
+            return headers;
+        }
+        throw new IllegalArgumentException("Invalid request headers (must be multiple of 2, but was " + headers.length);
     }
 
 }
