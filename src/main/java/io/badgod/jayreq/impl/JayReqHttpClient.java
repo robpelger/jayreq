@@ -1,6 +1,7 @@
-package io.badgod.jayreq.http;
+package io.badgod.jayreq.impl;
 
 import io.badgod.jayreq.*;
+import io.badgod.jayreq.Error;
 import io.badgod.jayreq.Request;
 import io.badgod.jayreq.Response;
 
@@ -22,13 +23,13 @@ public class JayReqHttpClient implements JayReq {
 
     private <T> Response<T> execute(Request req, Class<T> resultType) {
         try {
-            var httpResponse = client.send(createRequest(req), new HttpJsonBodyHandler<>(resultType));
+            var httpResponse = client.send(createRequest(req), new JsonBodyHandler<>(resultType));
             return new Response<>(httpResponse.body(), httpResponse.headers().map());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw HttpError.of(req, e);
+            throw Error.of(req, e);
         } catch (Exception e) {
-            throw HttpError.of(req, e);
+            throw Error.of(req, e);
         }
     }
 
@@ -39,7 +40,7 @@ public class JayReqHttpClient implements JayReq {
         var builder = HttpRequest.newBuilder().uri(request.uri);
 
         builder = switch (request.method) {
-            case HttpMethod.GET -> builder.GET();
+            case Method.GET -> builder.GET();
         };
 
         if (request.headers != null && request.headers.length > 0) {

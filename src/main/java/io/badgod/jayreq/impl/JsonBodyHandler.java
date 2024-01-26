@@ -1,16 +1,16 @@
-package io.badgod.jayreq.http;
+package io.badgod.jayreq.impl;
 
 import com.google.gson.Gson;
 
 import java.io.InputStreamReader;
 import java.net.http.HttpResponse;
 
-public class HttpJsonBodyHandler<T> implements HttpResponse.BodyHandler<T>{
+public class JsonBodyHandler<T> implements HttpResponse.BodyHandler<T>{
 
     private final Gson gson;
     private final Class<T> resultType;
 
-    public HttpJsonBodyHandler(Class<T> resultType) {
+    public JsonBodyHandler(Class<T> resultType) {
         this.gson = new Gson();
         this.resultType = resultType;
     }

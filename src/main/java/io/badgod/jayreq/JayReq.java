@@ -1,6 +1,6 @@
 package io.badgod.jayreq;
 
-import io.badgod.jayreq.http.JayReqHttpClient;
+import io.badgod.jayreq.impl.JayReqHttpClient;
 
 public interface JayReq {
 
