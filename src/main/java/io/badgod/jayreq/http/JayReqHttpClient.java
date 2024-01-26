@@ -26,11 +26,14 @@ public class JayReqHttpClient implements JayReq {
             return new Response<>(httpResponse.body(), httpResponse.headers().map());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new HttpError("Error executing HTTP call", e);
+            throw HttpError.of(req, e);
         } catch (Exception e) {
-            throw new HttpError("Error executing HTTP call", e);
+            throw HttpError.of(req, e);
         }
     }
+
+
+
 
     private static HttpRequest createRequest(Request request) {
         var builder = HttpRequest.newBuilder().uri(request.uri);
