@@ -1,19 +1,24 @@
 package io.badgod.jayreq.impl;
 
 import io.badgod.jayreq.*;
-import io.badgod.jayreq.Error;
-import io.badgod.jayreq.Request;
-import io.badgod.jayreq.Response;
+import io.badgod.jayreq.error.ConversionError;
+import io.badgod.jayreq.error.ExecutionError;
+
+import com.google.gson.Gson;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse.BodyHandlers;
+import java.nio.charset.StandardCharsets;
 
 public class JayReqHttpClient implements JayReq {
 
     private final HttpClient client;
+    private final Gson gson;
 
     public JayReqHttpClient() {
         this.client = HttpClient.newHttpClient();
+        this.gson = new Gson();
     }
 
     @Override
@@ -21,19 +26,37 @@ public class JayReqHttpClient implements JayReq {
         return this.execute(request, responseBodyType);
     }
 
-    private <T> Response<T> execute(Request req, Class<T> resultType) {
+    private <T> Response<T> execute(Request request, Class<T> resultType) {
         try {
-            var httpResponse = client.send(createRequest(req), new JsonBodyHandler<>(resultType));
-            return new Response<>(httpResponse.body(), httpResponse.headers().map());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw Error.of(req, e);
-        } catch (Exception e) {
-            throw Error.of(req, e);
+            Response<String> rawResponse = execute(request);
+            return convert(rawResponse, resultType);
+        } catch (ExecutionError e) {
+            throw new JayReqError(request, e);
+        } catch (ConversionError e) {
+            throw new JayReqError(request, e.rawResponse(), e);
         }
     }
 
+    private Response<String> execute(Request request) {
+        try {
+            var httpResp = client.send(createRequest(request), BodyHandlers.ofString(StandardCharsets.UTF_8));
+            return new Response<>(httpResp.body(), httpResp.headers().map());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ExecutionError(request, e);
+        } catch (Exception e) {
+            throw new ExecutionError(request, e);
+        }
+    }
 
+    private <T> Response<T> convert(Response<String> rawResponse, Class<T> resultType) {
+        try {
+            T body = gson.fromJson(rawResponse.body(), resultType);
+            return new Response<>(body, rawResponse.headers());
+        } catch (Exception e) {
+            throw new ConversionError(rawResponse, e);
+        }
+    }
 
 
     private static HttpRequest createRequest(Request request) {

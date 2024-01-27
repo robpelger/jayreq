@@ -1,8 +1,8 @@
 package io.badgod;
 
+import io.badgod.jayreq.JayReqError;
 import io.badgod.jayreq.JayReq;
 import io.badgod.jayreq.Request;
-import io.badgod.jayreq.Error;
 import io.badgod.jayreq.impl.JayReqHttpClient;
 import org.junit.jupiter.api.Test;
 
@@ -66,9 +66,16 @@ class JayReqTest extends TestContainerIntegrationTest {
 
     @Test
     void should_throw_on_connection_error() {
-        assertThrows(Error.class, () -> JayReq.get("http://localhost", String.class));
+        assertThrows(JayReqError.class, () -> JayReq.get("http://localhost", String.class));
     }
 
-    private record HttpBinGetResponse(String url, String method){};
-    private record HttpBinHeadersResponse(Map<String, String> headers){};
+    @Test
+    void should_throw_on_failed_json_mapping() {
+        String url = testUrl("/anything");
+        assertThrows(JayReqError.class, () -> JayReq.get(url, HttpBinGetResponseInvalid.class));
+    }
+
+    private record HttpBinGetResponse(String url, String method) {};
+    private record HttpBinGetResponseInvalid(int url, int method) {};
+    private record HttpBinHeadersResponse(Map<String, String> headers) {};
 }

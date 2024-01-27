@@ -1,8 +1,9 @@
 package io.badgod.jayreq;
 
+import java.io.Serializable;
 import java.net.URI;
 
-public class Request {
+public class Request implements Serializable {
     public final URI uri;
     public final Method method;
     public final String[] headers;
