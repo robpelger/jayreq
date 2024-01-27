@@ -1,8 +1,6 @@
 package io.badgod.jayreq.impl;
 
 import io.badgod.jayreq.*;
-import io.badgod.jayreq.error.ConversionError;
-import io.badgod.jayreq.error.ExecutionError;
 
 import com.google.gson.Gson;
 
@@ -28,7 +26,7 @@ public class JayReqHttpClient implements JayReq {
 
     private <T> Response<T> execute(Request request, Class<T> resultType) {
         try {
-            Response<String> rawResponse = execute(request);
+            Response<String> rawResponse = doExecute(request);
             return convert(rawResponse, resultType);
         } catch (ExecutionError e) {
             throw new JayReqError(request, e);
@@ -37,15 +35,12 @@ public class JayReqHttpClient implements JayReq {
         }
     }
 
-    private Response<String> execute(Request request) {
+    private Response<String> doExecute(Request request) {
         try {
             var httpResp = client.send(createRequest(request), BodyHandlers.ofString(StandardCharsets.UTF_8));
             return new Response<>(httpResp.body(), httpResp.headers().map());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new ExecutionError(request, e);
         } catch (Exception e) {
-            throw new ExecutionError(request, e);
+            throw new ExecutionError(e);
         }
     }
 

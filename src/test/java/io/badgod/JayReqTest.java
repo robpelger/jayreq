@@ -1,13 +1,14 @@
 package io.badgod;
 
-import io.badgod.jayreq.JayReqError;
-import io.badgod.jayreq.JayReq;
-import io.badgod.jayreq.Request;
+import io.badgod.jayreq.*;
 import io.badgod.jayreq.impl.JayReqHttpClient;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -75,7 +76,24 @@ class JayReqTest extends TestContainerIntegrationTest {
         assertThrows(JayReqError.class, () -> JayReq.get(url, HttpBinGetResponseInvalid.class));
     }
 
+    @Test
+    void should_be_able_to_inspect_request_and_raw_response_on_failed_json_mapping() {
+        try {
+            JayReq.get(testUrl("/anything"), HttpBinGetResponseInvalid.class);
+        } catch (JayReqError err) {
+            assertThat(err.rawResponse().isPresent(), is(true));
+            assertThat(err.rawResponse().get().body(), is(not(emptyOrNullString())));
+            assertThat(err.rawResponse().get().headers(), is(not(anEmptyMap())));
+            assertThat(err.request(), is(not(nullValue())));
+            assertThat(err.request().headers, is(not(nullValue())));
+            assertThat(err.request().method, is(Method.GET));
+            assertThat(err.request().uri.toString(), is(testUrl("/anything")));
+        }
+    }
+
+    // @formatter:off
     private record HttpBinGetResponse(String url, String method) {};
     private record HttpBinGetResponseInvalid(int url, int method) {};
     private record HttpBinHeadersResponse(Map<String, String> headers) {};
+    // @formatter:on
 }
