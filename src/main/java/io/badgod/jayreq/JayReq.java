@@ -9,4 +9,6 @@ public interface JayReq {
     }
 
     <T> Response<T> get(Request request, Class<T> responseBodyType);
+
+    <T> Response<T> post(Request request, Class<T> responseBodyType);
 }

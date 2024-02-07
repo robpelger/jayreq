@@ -24,6 +24,12 @@ public class JayReqHttpClient implements JayReq {
         return this.execute(request, responseBodyType);
     }
 
+    @Override
+    public <T> Response<T> post(Request request, Class<T> responseBodyType) {
+        var postRequest = new Request(Method.POST, request.uri, request.headers);
+        return this.execute(postRequest, responseBodyType);
+    }
+
     private <T> Response<T> execute(Request request, Class<T> resultType) {
         try {
             Response<String> rawResponse = doExecute(request);
@@ -64,6 +70,7 @@ public class JayReqHttpClient implements JayReq {
 
         builder = switch (request.method) {
             case Method.GET -> builder.GET();
+            case Method.POST -> builder.POST(HttpRequest.BodyPublishers.noBody());
         };
 
         if (request.headers != null && request.headers.length > 0) {

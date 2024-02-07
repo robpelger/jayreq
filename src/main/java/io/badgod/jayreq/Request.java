@@ -9,12 +9,12 @@ public class Request implements Serializable {
     public final String[] headers;
 
     public Request(String url, String... headers) {
-        this(URI.create(url), Method.GET, headers);
+        this(Method.GET, URI.create(url), headers);
     }
 
-    private Request(URI uri, Method method, String... headers) {
-        this.method = method;
+    public Request(Method method, URI uri, String... headers) {
         this.uri = uri;
+        this.method = method;
         this.headers = validateHeaders(headers);
     }
 
