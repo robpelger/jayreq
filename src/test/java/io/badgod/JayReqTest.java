@@ -70,6 +70,14 @@ class JayReqTest extends TestContainerIntegrationTest {
     }
 
     @Test
+    void should_contain_status_in_response() {
+        assertThat(JayReq.get(testUrl("/status/200"), Object.class).status(), is(200));
+        assertThat(JayReq.get(testUrl("/status/503"), Object.class).status(), is(503));
+        assertThat(JayReq.get(testUrl("/status/429"), Object.class).status(), is(429));
+        assertThat(JayReq.get(testUrl("/status/302101"), Object.class).status(), is(302));
+    }
+
+    @Test
     void should_throw_when_request_headers_not_in_pairs() {
         assertThrows(
             IllegalArgumentException.class,

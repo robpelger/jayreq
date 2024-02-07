@@ -38,7 +38,7 @@ public class JayReqHttpClient implements JayReq {
     private Response<String> doExecute(Request request) {
         try {
             var httpResp = client.send(createRequest(request), BodyHandlers.ofString(StandardCharsets.UTF_8));
-            return new Response<>(httpResp.body(), httpResp.headers().map());
+            return new Response<>(httpResp.body(), httpResp.statusCode(), httpResp.headers().map());
         } catch (Exception e) {
             throw new ExecutionError(e);
         }
@@ -46,10 +46,13 @@ public class JayReqHttpClient implements JayReq {
 
     private <T> Response<T> convert(Response<String> rawResponse, Class<T> resultType) {
         try {
-            return rawResponse.map((rawBody, rawHeaders) ->
-                new Response<>(
-                    gson.fromJson(rawBody, resultType),
-                    rawHeaders));
+            var convertedBodyOrNull = rawResponse.body()
+                .map(rawBody -> gson.fromJson(rawBody, resultType))
+                .orElse(null);
+            return new Response<>(
+                    convertedBodyOrNull,
+                    rawResponse.status(),
+                    rawResponse.headers());
         } catch (Exception e) {
             throw new ConversionError(rawResponse, e);
         }
