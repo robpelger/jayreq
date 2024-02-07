@@ -5,11 +5,9 @@ import io.badgod.jayreq.impl.JayReqHttpClient;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.*;
 
+import static io.badgod.jayreq.JayReq.get;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,22 +16,26 @@ class JayReqTest extends TestContainerIntegrationTest {
 
     @Test
     void should_do_get_request_via_shortcut() {
-        var resp = JayReq.get(testUrl("/anything"), HttpBinGetResponse.class);
-        assertThat(resp.body().url(), is(testUrl("/anything")));
-        assertThat(resp.body().method(), is("GET"));
+        var resp = get(testUrl("/anything"), HttpBinGetResponse.class);
+
+        assertThat(resp.body().isPresent(), is(true));
+        assertThat(resp.body().get().url(), is(testUrl("/anything")));
+        assertThat(resp.body().get().method(), is("GET"));
     }
 
     @Test
     void should_do_get_request_via_instance() {
         JayReq jr = new JayReqHttpClient();
         var resp = jr.get(new Request(testUrl("/anything")), HttpBinGetResponse.class);
-        assertThat(resp.body().url(), is(testUrl("/anything")));
-        assertThat(resp.body().method(), is("GET"));
+
+        assertThat(resp.body().isPresent(), is(true));
+        assertThat(resp.body().get().url(), is(testUrl("/anything")));
+        assertThat(resp.body().get().method(), is("GET"));
     }
 
     @Test
     void should_contain_response_headers() {
-        var resp = JayReq.get(testUrl("/headers"), HttpBinGetResponse.class);
+        var resp = get(testUrl("/headers"), HttpBinGetResponse.class);
         assertThat(resp.headers().entrySet(), is(not(empty())));
 
         // access to headers (i.e. the header keys) is case-insensitive!
@@ -43,8 +45,16 @@ class JayReqTest extends TestContainerIntegrationTest {
     }
 
     @Test
+    void should_contain_empty_body_when_there_is_no_body_in_http_response() {
+        var resp = get(testUrl("/status/200"), Object.class);
+
+        assertThat(resp.body().isEmpty(), is(true));
+        assertThat(resp.headers(), is(not(anEmptyMap())));
+    }
+
+    @Test
     void should_send_request_headers() {
-        var resp = JayReq.get(
+        var resp = get(
             testUrl("/headers"),
             HttpBinHeadersResponse.class,
             "Authorization", "Bearer xyz",
@@ -53,9 +63,10 @@ class JayReqTest extends TestContainerIntegrationTest {
 
         //The request headers are returned in the body in field "headers"
         //see: https://httpbin.org/#/Request_inspection/get_headers
-        assertThat(resp.body().headers().entrySet(), is(not(empty())));
-        assertThat(resp.body().headers().get("Authorization"), is("Bearer xyz"));
-        assertThat(resp.body().headers().get("X-Test"), is("Hello,World!"));
+        assertThat(resp.body().isPresent(), is(true));
+        assertThat(resp.body().get().headers().entrySet(), is(not(empty())));
+        assertThat(resp.body().get().headers().get("Authorization"), is("Bearer xyz"));
+        assertThat(resp.body().get().headers().get("X-Test"), is("Hello,World!"));
     }
 
     @Test
@@ -67,22 +78,22 @@ class JayReqTest extends TestContainerIntegrationTest {
 
     @Test
     void should_throw_on_connection_error() {
-        assertThrows(JayReqError.class, () -> JayReq.get("http://localhost", String.class));
+        assertThrows(JayReqError.class, () -> get("http://localhost", String.class));
     }
 
     @Test
     void should_throw_on_failed_json_mapping() {
         String url = testUrl("/anything");
-        assertThrows(JayReqError.class, () -> JayReq.get(url, HttpBinGetResponseInvalid.class));
+        assertThrows(JayReqError.class, () -> get(url, HttpBinGetResponseInvalid.class));
     }
 
     @Test
     void should_be_able_to_inspect_request_and_raw_response_on_failed_json_mapping() {
         try {
-            JayReq.get(testUrl("/anything"), HttpBinGetResponseInvalid.class);
+            get(testUrl("/anything"), HttpBinGetResponseInvalid.class);
         } catch (JayReqError err) {
             assertThat(err.rawResponse().isPresent(), is(true));
-            assertThat(err.rawResponse().get().body(), is(not(emptyOrNullString())));
+            assertThat(err.rawResponse().get().body(), is(not(Optional.empty())));
             assertThat(err.rawResponse().get().headers(), is(not(anEmptyMap())));
             assertThat(err.request(), is(not(nullValue())));
             assertThat(err.request().headers, is(not(nullValue())));

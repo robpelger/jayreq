@@ -46,8 +46,10 @@ public class JayReqHttpClient implements JayReq {
 
     private <T> Response<T> convert(Response<String> rawResponse, Class<T> resultType) {
         try {
-            T body = gson.fromJson(rawResponse.body(), resultType);
-            return new Response<>(body, rawResponse.headers());
+            return rawResponse.map((rawBody, rawHeaders) ->
+                new Response<>(
+                    gson.fromJson(rawBody, resultType),
+                    rawHeaders));
         } catch (Exception e) {
             throw new ConversionError(rawResponse, e);
         }
