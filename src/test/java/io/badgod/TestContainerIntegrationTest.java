@@ -4,6 +4,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.GenericContainer;
 
+import java.net.URI;
+
 public abstract class TestContainerIntegrationTest {
     protected static GenericContainer<?> container;
 
@@ -26,5 +28,9 @@ public abstract class TestContainerIntegrationTest {
             container.getHost(),
             container.getFirstMappedPort(),
             path);
+    }
+
+    protected static URI testUri(String path) {
+        return URI.create(testUrl(path));
     }
 }

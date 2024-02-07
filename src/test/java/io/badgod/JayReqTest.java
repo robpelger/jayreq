@@ -26,7 +26,7 @@ class JayReqTest extends TestContainerIntegrationTest {
     @Test
     void should_do_get_request_via_instance() {
         JayReq jr = new JayReqHttpClient();
-        var resp = jr.get(new Request(testUrl("/anything")), HttpBinGetResponse.class);
+        var resp = jr.get(new Request<>(testUrl("/anything")), HttpBinGetResponse.class);
 
         assertThat(resp.body().isPresent(), is(true));
         assertThat(resp.body().get().url(), is(testUrl("/anything")));
@@ -81,7 +81,7 @@ class JayReqTest extends TestContainerIntegrationTest {
     void should_throw_when_request_headers_not_in_pairs() {
         assertThrows(
             IllegalArgumentException.class,
-            () -> new Request("http://test", "X-Test"));
+            () -> new Request<>("http://test", "X-Test"));
     }
 
     @Test
@@ -104,9 +104,9 @@ class JayReqTest extends TestContainerIntegrationTest {
             assertThat(err.rawResponse().get().body(), is(not(Optional.empty())));
             assertThat(err.rawResponse().get().headers(), is(not(anEmptyMap())));
             assertThat(err.request(), is(not(nullValue())));
-            assertThat(err.request().headers, is(not(nullValue())));
-            assertThat(err.request().method, is(Method.GET));
-            assertThat(err.request().uri.toString(), is(testUrl("/anything")));
+            assertThat(err.request().headers(), is(not(nullValue())));
+            assertThat(err.request().method(), is(Method.GET));
+            assertThat(err.request().uri().toString(), is(testUrl("/anything")));
         }
     }
 

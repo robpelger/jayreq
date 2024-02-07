@@ -2,20 +2,39 @@ package io.badgod.jayreq;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Optional;
 
-public class Request implements Serializable {
-    public final URI uri;
-    public final Method method;
-    public final String[] headers;
+public class Request<T> implements Serializable {
+    private final URI uri;
+    private final Method method;
+    private final T body;
+    private final String[] headers;
 
     public Request(String url, String... headers) {
-        this(Method.GET, URI.create(url), headers);
+        this(Method.GET, URI.create(url), null, headers);
     }
 
-    public Request(Method method, URI uri, String... headers) {
+    public Request(Method method, URI uri, T body, String... headers) {
         this.uri = uri;
         this.method = method;
+        this.body = body;
         this.headers = validateHeaders(headers);
+    }
+
+    public URI uri() {
+        return uri;
+    }
+
+    public Method method() {
+        return method;
+    }
+
+    public Optional<T> body() {
+        return Optional.ofNullable(body);
+    }
+
+    public String[] headers() {
+        return headers;
     }
 
     private static String[] validateHeaders(String... headers){

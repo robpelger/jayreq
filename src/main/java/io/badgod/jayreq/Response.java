@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 
-public class Response<T>  implements Serializable {
+public class Response<T> implements Serializable {
     private final T body;
     private final int status;
     private final Map<String, List<String>> headers;
