@@ -14,7 +14,7 @@ public class HeadersTest {
     @Test
     void should_have_headers_present() {
         assertThat(Headers.of("x", "y").isPresent(), is(true));
-        assertThat(new Headers().isPresent(), is(false));
+        assertThat(Headers.empty().isPresent(), is(false));
     }
 
     @Test

@@ -9,7 +9,7 @@ public class Headers {
 
     private final Map<String, List<String>> headersMap;
 
-    public Headers() {
+    private Headers() {
         this.headersMap = new LinkedHashMap<>();
     }
 
@@ -26,6 +26,10 @@ public class Headers {
             arr[idx.getAndIncrement()] = String.join(",", value);
         });
         return arr;
+    }
+
+    public static Headers empty() {
+        return new Headers();
     }
 
     public static Headers of(String key, String... values) {

@@ -12,10 +12,10 @@ import static org.hamcrest.Matchers.is;
 public class RequestTest {
     @Test
     void should_create_empty_headers_in_request() {
-        assertThat(new Request<>("http://x", (Headers[]) null).headers(), is(new Headers()));
-        assertThat(new Request<>("http://x", (Headers) null).headers(), is(new Headers()));
-        assertThat(new Request<>("http://x").headers(), is(new Headers()));
-        assertThat(new Request<>("http://x", of(null)).headers(), is(new Headers()));
+        assertThat(new Request<>("http://x", (Headers[]) null).headers(), is(Headers.empty()));
+        assertThat(new Request<>("http://x", (Headers) null).headers(), is(Headers.empty()));
+        assertThat(new Request<>("http://x").headers(), is(Headers.empty()));
+        assertThat(new Request<>("http://x", of(null)).headers(), is(Headers.empty()));
     }
 
     @Test
