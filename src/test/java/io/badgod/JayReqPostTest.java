@@ -1,7 +1,6 @@
 package io.badgod;
 
-import io.badgod.jayreq.Method;
-import io.badgod.jayreq.Request;
+import io.badgod.jayreq.*;
 import io.badgod.jayreq.impl.JayReqHttpClient;
 
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,12 @@ class JayReqPostTest extends TestContainerIntegrationTest {
 
     @Test
     void should_do_post_with_body() {
-        var req = new Request<>(Method.POST, testUri("/anything"), "some-body", "X-Header1", "header-1-value");
+        var req = new Request<>(
+            Method.POST,
+            testUri("/anything"),
+            "some-body",
+            Headers.of("X-Header1", "header-1-value")
+        );
         var res = new JayReqHttpClient().post(req, HttpBinPostResponse.class);
 
         assertThat(res.body().isPresent(), is(true));

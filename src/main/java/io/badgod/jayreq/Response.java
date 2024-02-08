@@ -2,7 +2,6 @@ package io.badgod.jayreq;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.function.Function;
 
 public class Response<T> implements Serializable {
     private final T body;
@@ -25,9 +24,5 @@ public class Response<T> implements Serializable {
 
     public Map<String, List<String>> headers() {
         return headers;
-    }
-
-    public <R> Response<R> map(Function<Response<T>, Response<R>> mapperFn) {
-        return mapperFn.apply(this);
     }
 }

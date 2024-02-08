@@ -75,8 +75,8 @@ public class JayReqHttpClient implements JayReq {
                 .orElse(HttpRequest.BodyPublishers.noBody()));
         };
 
-        if (request.headers() != null && request.headers().length > 0) {
-            builder = builder.headers(request.headers());
+        if (request.headers().isPresent()) {
+            builder = builder.headers(request.headers().toStringArray());
         }
 
         return builder.build();

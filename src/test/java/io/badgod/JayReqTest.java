@@ -57,9 +57,10 @@ class JayReqTest extends TestContainerIntegrationTest {
         var resp = get(
             testUrl("/headers"),
             HttpBinHeadersResponse.class,
-            "Authorization", "Bearer xyz",
-            "X-Test", "Hello",
-            "X-Test", "World!");
+            Headers.of("Authorization", "Bearer xyz"),
+            Headers.of("X-Test", "Hello"),
+            Headers.of("X-Test", "World!")
+        );
 
         //The request headers are returned in the body in field "headers"
         //see: https://httpbin.org/#/Request_inspection/get_headers
@@ -81,7 +82,7 @@ class JayReqTest extends TestContainerIntegrationTest {
     void should_throw_when_request_headers_not_in_pairs() {
         assertThrows(
             IllegalArgumentException.class,
-            () -> new Request<>("http://test", "X-Test"));
+            () -> new Request<>("http://test", Headers.of("X-Test")));
     }
 
     @Test
