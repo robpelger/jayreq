@@ -1,8 +1,8 @@
 package io.badgod;
 
 import io.badgod.jayreq.*;
-import io.badgod.jayreq.impl.JayReqHttpClient;
 
+import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -10,30 +10,34 @@ import static org.hamcrest.Matchers.is;
 
 class JayReqPostTest extends TestContainerIntegrationTest {
 
+    private final Gson gson = new Gson();
+    private final Body.Converter<HttpBinPostResponse> converter = (s, h, b) -> gson.fromJson(b, HttpBinPostResponse.class);
+
     @Test
     void should_do_post() {
-        Request<?> req = new Request<>(testUrl("/anything"));
-        var resp = new JayReqHttpClient().post(req, HttpBinPostResponse.class);
+        Request req = new Request(testUrl("/anything"));
 
-        assertThat(resp.body().isPresent(), is(true));
-        assertThat(resp.body().get().url(), is(testUrl("/anything")));
-        assertThat(resp.body().get().method(), is("POST"));
+        var body = new JayReq.Client().post(req).body(converter);
+
+        assertThat(body.isPresent(), is(true));
+        assertThat(body.get().url(), is(testUrl("/anything")));
+        assertThat(body.get().method(), is("POST"));
     }
 
     @Test
     void should_do_post_with_body() {
-        var req = new Request<>(
+        var req = new Request(
             Method.POST,
             testUri("/anything"),
-            "some-body",
+            Body.of("some-body"),
             Headers.of("X-Header1", "header-1-value")
         );
-        var res = new JayReqHttpClient().post(req, HttpBinPostResponse.class);
+        var body = new JayReq.Client().post(req).body(converter);
 
-        assertThat(res.body().isPresent(), is(true));
-        assertThat(res.body().get().url(), is(testUrl("/anything")));
-        assertThat(res.body().get().method(), is("POST"));
-        assertThat(res.body().get().data(), is("some-body"));
+        assertThat(body.isPresent(), is(true));
+        assertThat(body.get().url(), is(testUrl("/anything")));
+        assertThat(body.get().method(), is("POST"));
+        assertThat(body.get().data(), is("some-body"));
     }
 
     // @formatter:off

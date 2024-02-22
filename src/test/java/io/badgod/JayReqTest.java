@@ -1,8 +1,9 @@
 package io.badgod;
 
 import io.badgod.jayreq.*;
-import io.badgod.jayreq.impl.JayReqHttpClient;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -14,28 +15,33 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class JayReqTest extends TestContainerIntegrationTest {
 
+    private final static Gson gson = new Gson();
+    private final Body.Converter<HttpBinGetResponse> converter = (s, h, b) -> gson.fromJson(b, HttpBinGetResponse.class);
+
     @Test
     void should_do_get_request_via_shortcut() {
-        var resp = get(testUrl("/anything"), HttpBinGetResponse.class);
+        var resp = get(testUrl("/anything"));
 
-        assertThat(resp.body().isPresent(), is(true));
-        assertThat(resp.body().get().url(), is(testUrl("/anything")));
-        assertThat(resp.body().get().method(), is("GET"));
+        var body = resp.body(converter);
+
+        assertThat(body.isPresent(), is(true));
+        assertThat(body.get().url(), is(testUrl("/anything")));
+        assertThat(body.get().method(), is("GET"));
     }
 
     @Test
     void should_do_get_request_via_instance() {
-        JayReq jr = new JayReqHttpClient();
-        var resp = jr.get(new Request<>(testUrl("/anything")), HttpBinGetResponse.class);
+        JayReq jr = new JayReq.Client();
 
-        assertThat(resp.body().isPresent(), is(true));
-        assertThat(resp.body().get().url(), is(testUrl("/anything")));
-        assertThat(resp.body().get().method(), is("GET"));
+        Optional<HttpBinGetResponse> body = jr.get(new Request(testUrl("/anything"))).body(converter);
+        assertThat(body.isPresent(), is(true));
+        assertThat(body.get().url(), is(testUrl("/anything")));
+        assertThat(body.get().method(), is("GET"));
     }
 
     @Test
     void should_contain_response_headers() {
-        var resp = get(testUrl("/headers"), HttpBinGetResponse.class);
+        var resp = get(testUrl("/headers"));
         assertThat(resp.headers().entrySet(), is(not(empty())));
 
         // access to headers (i.e. the header keys) is case-insensitive!
@@ -46,7 +52,7 @@ class JayReqTest extends TestContainerIntegrationTest {
 
     @Test
     void should_contain_empty_body_when_there_is_no_body_in_http_response() {
-        var resp = get(testUrl("/status/200"), Object.class);
+        var resp = get(testUrl("/status/200"));
 
         assertThat(resp.body().isEmpty(), is(true));
         assertThat(resp.headers(), is(not(anEmptyMap())));
@@ -56,7 +62,6 @@ class JayReqTest extends TestContainerIntegrationTest {
     void should_send_request_headers() {
         var resp = get(
             testUrl("/headers"),
-            HttpBinHeadersResponse.class,
             Headers.of("Authorization", "Bearer xyz"),
             Headers.of("X-Test", "Hello"),
             Headers.of("X-Test", "World!")
@@ -64,46 +69,44 @@ class JayReqTest extends TestContainerIntegrationTest {
 
         //The request headers are returned in the body in field "headers"
         //see: https://httpbin.org/#/Request_inspection/get_headers
-        assertThat(resp.body().isPresent(), is(true));
-        assertThat(resp.body().get().headers().entrySet(), is(not(empty())));
-        assertThat(resp.body().get().headers().get("Authorization"), is("Bearer xyz"));
-        assertThat(resp.body().get().headers().get("X-Test"), is("Hello,World!"));
+        var body = resp.body((s, h, b) -> new Gson().fromJson(b, HttpBinHeadersResponse.class));
+        assertThat(body.isPresent(), is(true));
+        assertThat(body.get().headers().entrySet(), is(not(empty())));
+        assertThat(body.get().headers().get("Authorization"), is("Bearer xyz"));
+        assertThat(body.get().headers().get("X-Test"), is("Hello,World!"));
     }
 
     @Test
     void should_contain_status_in_response() {
-        assertThat(JayReq.get(testUrl("/status/200"), Object.class).status(), is(200));
-        assertThat(JayReq.get(testUrl("/status/503"), Object.class).status(), is(503));
-        assertThat(JayReq.get(testUrl("/status/429"), Object.class).status(), is(429));
-        assertThat(JayReq.get(testUrl("/status/302101"), Object.class).status(), is(302));
+        assertThat(JayReq.get(testUrl("/status/200")).status(), is(200));
+        assertThat(JayReq.get(testUrl("/status/503")).status(), is(503));
+        assertThat(JayReq.get(testUrl("/status/429")).status(), is(429));
+        assertThat(JayReq.get(testUrl("/status/302101")).status(), is(302));
     }
 
-    @Test
-    void should_throw_when_request_headers_not_in_pairs() {
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> new Request<>("http://test", Headers.of("X-Test")));
-    }
+
 
     @Test
     void should_throw_on_connection_error() {
-        assertThrows(JayReqError.class, () -> get("http://localhost", String.class));
+        assertThrows(JayReq.Error.class, () -> get("http://localhost"));
     }
 
     @Test
     void should_throw_on_failed_json_mapping() {
         String url = testUrl("/anything");
-        assertThrows(JayReqError.class, () -> get(url, HttpBinGetResponseInvalid.class));
+        assertThrows(
+            JsonSyntaxException.class,
+            () -> get(url).body((s, h, b) -> gson.fromJson(b, HttpBinGetResponseInvalid.class)));
     }
 
     @Test
     void should_be_able_to_inspect_request_and_raw_response_on_failed_json_mapping() {
         try {
-            get(testUrl("/anything"), HttpBinGetResponseInvalid.class);
-        } catch (JayReqError err) {
-            assertThat(err.rawResponse().isPresent(), is(true));
-            assertThat(err.rawResponse().get().body(), is(not(Optional.empty())));
-            assertThat(err.rawResponse().get().headers(), is(not(anEmptyMap())));
+            get(testUrl("/anything"));
+        } catch (JayReq.Error err) {
+            assertThat(err.response().isPresent(), is(true));
+            assertThat(err.response().get().body(), is(not(Optional.empty())));
+            assertThat(err.response().get().headers(), is(not(anEmptyMap())));
             assertThat(err.request(), is(not(nullValue())));
             assertThat(err.request().headers(), is(not(nullValue())));
             assertThat(err.request().method(), is(Method.GET));

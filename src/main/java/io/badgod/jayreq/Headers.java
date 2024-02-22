@@ -1,11 +1,12 @@
 package io.badgod.jayreq;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public class Headers {
+public class Headers implements Serializable {
 
     private final Map<String, List<String>> headersMap;
 
@@ -42,6 +43,16 @@ public class Headers {
         }
     }
 
+    public static Headers of(Map<String, List<String>> headersMap) {
+        if(headersMap == null || headersMap.isEmpty()) {
+            return Headers.empty();
+        }
+        return headersMap.entrySet()
+            .stream()
+            .map(entry -> Headers.of(entry.getKey(), entry.getValue().toArray(new String[0])))
+            .reduce(Headers.empty(), Headers::mergeAll);
+    }
+
     public static Headers mergeAll(Headers... headers) {
         if (headers == null || headers.length == 0) {
             return new Headers();
@@ -52,13 +63,13 @@ public class Headers {
         }
     }
 
-    private void forEach(Consumer<Map.Entry<String, List<String>>> consumerFn) {
-        headersMap.entrySet().forEach(consumerFn);
-    }
-
     private Headers merge(Headers other) {
         other.forEach(entry -> merge(entry.getKey(), entry.getValue()));
         return this;
+    }
+
+    private void forEach(Consumer<Map.Entry<String, List<String>>> consumerFn) {
+        headersMap.entrySet().forEach(consumerFn);
     }
 
     private void merge(String key, List<String> values) {
@@ -96,5 +107,9 @@ public class Headers {
     @Override
     public int hashCode() {
         return Objects.hash(headersMap);
+    }
+
+    public Optional<List<String>> get(String key) {
+        return Optional.ofNullable(headersMap.get(key));
     }
 }

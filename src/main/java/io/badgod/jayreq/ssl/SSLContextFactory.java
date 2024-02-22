@@ -18,7 +18,7 @@ public class SSLContextFactory {
                 .loadTrustMaterial(keystore, (chain, authType) -> true)
                 .build();
         } catch (Exception e) {
-            throw new RuntimeException("Error initialising SSL-Context", e);
+            throw new SSLContextError("Error initialising SSL-Context", e);
         }
     }
 
