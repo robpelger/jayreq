@@ -43,8 +43,13 @@ public interface JayReq {
 
         private Response execute(Request request) {
             try {
-                var httpResp = httpClient.send(createRequest(request), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-                return new Response(httpResp.body(), httpResp.statusCode(), httpResp.headers().map());
+                var httpResp = httpClient.send(
+                    createRequest(request),
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                return new Response(
+                    httpResp.body(),
+                    httpResp.statusCode(),
+                    httpResp.headers().map());
             } catch (Exception e) {
                 throw new Error(request, e);
             }

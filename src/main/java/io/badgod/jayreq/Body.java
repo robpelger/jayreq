@@ -29,7 +29,7 @@ public class Body implements Serializable {
     }
 
     public interface Converter<T> {
-        T apply(int status, Map<String, List<String>> headers, String body);
+        T apply(int status, Headers headers, String body);
     }
 
     @Override

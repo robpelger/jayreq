@@ -49,7 +49,7 @@ public class Headers implements Serializable {
         }
         return headersMap.entrySet()
             .stream()
-            .map(entry -> Headers.of(entry.getKey(), entry.getValue().toArray(new String[0])))
+            .map(entry -> Headers.of(entry.getKey().toLowerCase(), entry.getValue().toArray(new String[0])))
             .reduce(Headers.empty(), Headers::mergeAll);
     }
 
@@ -110,6 +110,7 @@ public class Headers implements Serializable {
     }
 
     public Optional<List<String>> get(String key) {
-        return Optional.ofNullable(headersMap.get(key));
+        Objects.requireNonNull(key);
+        return Optional.ofNullable(headersMap.get(key.toLowerCase()));
     }
 }

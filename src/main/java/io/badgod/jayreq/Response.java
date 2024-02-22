@@ -6,12 +6,12 @@ import java.util.*;
 public class Response implements Serializable {
     private final Body body;
     private final int status;
-    private final Map<String, List<String>> headers;
+    private final Headers headers;
 
     public Response(String body, int status, Map<String, List<String>> headers) {
         this.body = Body.of(body);
         this.status = status;
-        this.headers = headers;
+        this.headers = Headers.of(headers);
     }
 
     /**
@@ -34,7 +34,7 @@ public class Response implements Serializable {
         return status;
     }
 
-    public Map<String, List<String>> headers() {
+    public Headers headers() {
         return headers;
     }
 }

@@ -42,12 +42,13 @@ class JayReqTest extends TestContainerIntegrationTest {
     @Test
     void should_contain_response_headers() {
         var resp = get(testUrl("/headers"));
-        assertThat(resp.headers().entrySet(), is(not(empty())));
+        assertThat(resp.headers().isPresent(), is(true));
 
         // access to headers (i.e. the header keys) is case-insensitive!
-        assertThat(resp.headers().get("Content-Type"), is(List.of("application/json")));
-        assertThat(resp.headers().get("CONTENT-TYPE"), is(List.of("application/json")));
-        assertThat(resp.headers().get("content-type"), is(List.of("application/json")));
+        assertThat(resp.headers().get("Content-Type").isPresent(), is(true));
+        assertThat(resp.headers().get("Content-Type").get(), is(List.of("application/json")));
+        assertThat(resp.headers().get("CONTENT-TYPE").get(), is(List.of("application/json")));
+        assertThat(resp.headers().get("content-type").get(), is(List.of("application/json")));
     }
 
     @Test
@@ -55,7 +56,7 @@ class JayReqTest extends TestContainerIntegrationTest {
         var resp = get(testUrl("/status/200"));
 
         assertThat(resp.body().isEmpty(), is(true));
-        assertThat(resp.headers(), is(not(anEmptyMap())));
+        assertThat(resp.headers().isPresent(), is(true));
     }
 
     @Test
@@ -84,8 +85,6 @@ class JayReqTest extends TestContainerIntegrationTest {
         assertThat(JayReq.get(testUrl("/status/302101")).status(), is(302));
     }
 
-
-
     @Test
     void should_throw_on_connection_error() {
         assertThrows(JayReq.Error.class, () -> get("http://localhost"));
@@ -106,7 +105,7 @@ class JayReqTest extends TestContainerIntegrationTest {
         } catch (JayReq.Error err) {
             assertThat(err.response().isPresent(), is(true));
             assertThat(err.response().get().body(), is(not(Optional.empty())));
-            assertThat(err.response().get().headers(), is(not(anEmptyMap())));
+            assertThat(err.response().get().headers().isPresent(), is(true));
             assertThat(err.request(), is(not(nullValue())));
             assertThat(err.request().headers(), is(not(nullValue())));
             assertThat(err.request().method(), is(Method.GET));
