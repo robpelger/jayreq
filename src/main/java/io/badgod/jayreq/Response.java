@@ -14,7 +14,6 @@ public class Response implements Serializable {
         this.headers = headers;
     }
 
-
     /**
      * If a body is present in this response, the given body-converter function offers you a way to convert the raw body
      * (String) to any object you like. The converter function will have access to the response headers.

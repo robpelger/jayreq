@@ -31,4 +31,9 @@ public class Body implements Serializable {
     public interface Converter<T> {
         T apply(int status, Map<String, List<String>> headers, String body);
     }
+
+    @Override
+    public String toString() {
+        return value;
+    }
 }
