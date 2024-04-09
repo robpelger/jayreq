@@ -35,4 +35,9 @@ public class Request implements Serializable {
     public Headers headers() {
         return headers;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s - Body='%s' - Headers='%s'", method, uri, body, headers);
+    }
 }

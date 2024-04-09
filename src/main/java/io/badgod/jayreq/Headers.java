@@ -109,6 +109,12 @@ public class Headers implements Serializable {
         return Objects.hash(headersMap);
     }
 
+    @Override
+    public String toString() {
+        return headersMap.toString();
+
+    }
+
     public Optional<List<String>> get(String key) {
         Objects.requireNonNull(key);
         return Optional.ofNullable(headersMap.get(key.toLowerCase()));

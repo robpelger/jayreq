@@ -37,4 +37,9 @@ public class Response implements Serializable {
     public Headers headers() {
         return headers;
     }
+
+    @Override
+    public String toString() {
+        return  String.format("Status: %s%nBody: '%s'%nHeaders: '%s'", status, body, headers);
+    }
 }
