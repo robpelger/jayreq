@@ -4,11 +4,13 @@ import java.io.Serializable;
 import java.util.*;
 
 public class Response implements Serializable {
+    private final Request request;
     private final Body body;
     private final int status;
     private final Headers headers;
 
-    public Response(String body, int status, Map<String, List<String>> headers) {
+    public Response(Request request, String body, int status, Map<String, List<String>> headers) {
+        this.request = request;
         this.body = Body.of(body);
         this.status = status;
         this.headers = Headers.of(headers);
@@ -24,6 +26,10 @@ public class Response implements Serializable {
      */
     public <T> Optional<T> body(Body.Converter<T> bodyConverter) {
         return body.value().map(rawBody -> bodyConverter.apply(status, headers, rawBody));
+    }
+
+    public Request request() {
+        return request;
     }
 
     public Body body() {

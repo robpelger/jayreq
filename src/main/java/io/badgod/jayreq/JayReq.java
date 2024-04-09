@@ -47,6 +47,7 @@ public interface JayReq {
                     createRequest(request),
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
                 return new Response(
+                    request,
                     httpResp.body(),
                     httpResp.statusCode(),
                     httpResp.headers().map());
