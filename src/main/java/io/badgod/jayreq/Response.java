@@ -46,6 +46,6 @@ public class Response implements Serializable {
 
     @Override
     public String toString() {
-        return  String.format("Status: %s%nBody: '%s'%nHeaders: '%s'", status, body, headers);
+        return  String.format("Status: %s%nBody: %s%nHeaders: %s", status, body, headers);
     }
 }
