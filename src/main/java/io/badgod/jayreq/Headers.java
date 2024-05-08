@@ -11,7 +11,7 @@ public class Headers implements Serializable {
     private final Map<String, List<String>> headersMap;
 
     private Headers() {
-        this.headersMap = new LinkedHashMap<>();
+        this.headersMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     }
 
     public boolean isPresent() {
@@ -53,7 +53,7 @@ public class Headers implements Serializable {
         }
         return headersMap.entrySet()
             .stream()
-            .map(entry -> Headers.of(entry.getKey().toLowerCase(), entry.getValue().toArray(new String[0])))
+            .map(entry -> Headers.of(entry.getKey(), entry.getValue().toArray(new String[0])))
             .reduce(Headers.empty(), Headers::mergeAll);
     }
 
@@ -88,7 +88,7 @@ public class Headers implements Serializable {
     }
 
     private Headers with(String key, List<String> values) {
-        headersMap.put(key.toLowerCase(), values);
+        headersMap.put(key, values);
         return this;
     }
 
@@ -121,6 +121,6 @@ public class Headers implements Serializable {
 
     public Optional<List<String>> get(String key) {
         Objects.requireNonNull(key);
-        return Optional.ofNullable(headersMap.get(key.toLowerCase()));
+        return Optional.ofNullable(headersMap.get(key));
     }
 }

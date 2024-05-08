@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.badgod"
-version = "0.0.3"
+version = "0.0.4"
 
 
 repositories {
@@ -44,7 +44,11 @@ mavenPublishing {
     signAllPublications()
 
 
-    coordinates("io.badgod", "jayreq", "0.0.2")
+    coordinates(
+        project.group.toString(),
+        rootProject.name,
+        project.version.toString()
+    )
 
     pom {
         name.set("JayReq")

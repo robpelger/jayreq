@@ -31,19 +31,19 @@ class HeadersTest {
     void should_merge_headers() {
         var merged = Headers.mergeAll(
             of("X", "value1"),
-            of("Y", "value2"),
-            of("X", "value3")
+            of("y", "value2"),
+            of("x", "value3")
         );
         assertThat(
             merged.toStringArray(),
-            is(new String[]{"x", "value1,value3", "y", "value2"}));
+            is(new String[]{"X", "value1,value3", "y", "value2"}));
     }
 
     @Test
     void should_flatten_to_array() {
         var arr = of("X-Test", "a", "b").toStringArray();
         assertThat(arr.length, is(2));
-        assertThat(arr[0], is("x-test"));
+        assertThat(arr[0], is("X-Test"));
         assertThat(arr[1], is("a,b"));
     }
 
@@ -86,5 +86,17 @@ class HeadersTest {
         var result = Headers.authBearer("some-token-value");
         assertThat(result.get("Authorization").isPresent(), is(true));
         assertThat(result.get("Authorization").get(), is(List.of("Bearer some-token-value")));
+    }
+
+    @Test
+    void should_sensitive() {
+        var map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        map.put("ABC", "a");
+        map.put("abc", "b");
+
+        System.out.println(map);
+        System.out.println(map.get("ABC"));
+        System.out.println(map.get("abc"));
+        System.out.println(map.get("aBc"));
     }
 }
