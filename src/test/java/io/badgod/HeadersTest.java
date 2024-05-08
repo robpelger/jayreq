@@ -1,7 +1,6 @@
 package io.badgod;
 
 import io.badgod.jayreq.Headers;
-import io.badgod.jayreq.Request;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -9,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 import static io.badgod.jayreq.Headers.of;
-import static java.util.Map.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThrows;
@@ -38,14 +36,14 @@ class HeadersTest {
         );
         assertThat(
             merged.toStringArray(),
-            is(new String[]{"X", "value1,value3", "Y", "value2"}));
+            is(new String[]{"x", "value1,value3", "y", "value2"}));
     }
 
     @Test
     void should_flatten_to_array() {
         var arr = of("X-Test", "a", "b").toStringArray();
         assertThat(arr.length, is(2));
-        assertThat(arr[0], is("X-Test"));
+        assertThat(arr[0], is("x-test"));
         assertThat(arr[1], is("a,b"));
     }
 
@@ -76,9 +74,17 @@ class HeadersTest {
         ));
 
         assertThat(headers.get("x").isPresent(), is(true));
+        assertThat(headers.get("X").isPresent(), is(true));
         assertThat(headers.get("y").isPresent(), is(true));
         assertThat(headers.get("z").isPresent(), is(false));
         assertThat(headers.get("x").get(), is(List.of("a", "b")));
         assertThat(headers.get("y").get(), is(List.of("C")));
+    }
+
+    @Test
+    void should_create_auth_bearer_header() {
+        var result = Headers.authBearer("some-token-value");
+        assertThat(result.get("Authorization").isPresent(), is(true));
+        assertThat(result.get("Authorization").get(), is(List.of("Bearer some-token-value")));
     }
 }

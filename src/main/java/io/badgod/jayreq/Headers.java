@@ -43,8 +43,12 @@ public class Headers implements Serializable {
         }
     }
 
+    public static Headers authBearer(String tokenValue) {
+        return Headers.of("Authorization", "Bearer " + tokenValue);
+    }
+
     public static Headers of(Map<String, List<String>> headersMap) {
-        if(headersMap == null || headersMap.isEmpty()) {
+        if (headersMap == null || headersMap.isEmpty()) {
             return Headers.empty();
         }
         return headersMap.entrySet()
@@ -84,7 +88,7 @@ public class Headers implements Serializable {
     }
 
     private Headers with(String key, List<String> values) {
-        headersMap.put(key, values);
+        headersMap.put(key.toLowerCase(), values);
         return this;
     }
 
