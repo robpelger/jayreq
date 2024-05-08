@@ -1,6 +1,7 @@
 package io.badgod.jayreq;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -45,6 +46,16 @@ public class Headers implements Serializable {
 
     public static Headers authBearer(String tokenValue) {
         return Headers.of("Authorization", "Bearer " + tokenValue);
+    }
+
+    public static Headers authBasic(String username, String password) {
+        var value = nullToBlank(username) + ":" + nullToBlank(password);
+        var valueEncoded = Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+        return Headers.of("Authorization", "Basic " + valueEncoded);
+    }
+
+    public static Headers accept(String... acceptValues) {
+        return Headers.of("Accept", acceptValues);
     }
 
     public static Headers of(Map<String, List<String>> headersMap) {
@@ -98,6 +109,12 @@ public class Headers implements Serializable {
 
     private static boolean isNullOrEmpty(String... values) {
         return values == null || values.length == 0;
+    }
+
+    private static String nullToBlank(String value) {
+        return value == null
+            ? ""
+            : value;
     }
 
     @Override

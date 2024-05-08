@@ -83,20 +83,24 @@ class HeadersTest {
 
     @Test
     void should_create_auth_bearer_header() {
-        var result = Headers.authBearer("some-token-value");
-        assertThat(result.get("Authorization").isPresent(), is(true));
-        assertThat(result.get("Authorization").get(), is(List.of("Bearer some-token-value")));
+        assertThat(Headers.authBearer("some-token-value").toStringArray()[0], is("Authorization"));
+        assertThat(Headers.authBearer("some-token-value").toStringArray()[1], is("Bearer some-token-value"));
     }
 
     @Test
-    void should_sensitive() {
-        var map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        map.put("ABC", "a");
-        map.put("abc", "b");
+    void should_set_valid_auth_basic_header() {
+        assertThat(Headers.authBasic("Guy", "Test").toStringArray()[0], is("Authorization"));
 
-        System.out.println(map);
-        System.out.println(map.get("ABC"));
-        System.out.println(map.get("abc"));
-        System.out.println(map.get("aBc"));
+        assertThat(Headers.authBasic("Guy", "Test").toStringArray()[1], is("Basic R3V5OlRlc3Q="));
+        assertThat(Headers.authBasic(null, "Test").toStringArray()[1], is("Basic OlRlc3Q="));
+        assertThat(Headers.authBasic("Guy", null).toStringArray()[1], is("Basic R3V5Og=="));
+        assertThat(Headers.authBasic(null, null).toStringArray()[1], is("Basic Og=="));
+    }
+
+    @Test
+    void should_set_accept_headers() {
+        var acceptHeader = Headers.accept("application/json", "text/plain");
+        assertThat(acceptHeader.toStringArray()[0], is("Accept"));
+        assertThat(acceptHeader.toStringArray()[1], is("application/json,text/plain"));
     }
 }
